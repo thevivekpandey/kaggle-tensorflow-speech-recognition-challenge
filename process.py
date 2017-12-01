@@ -15,20 +15,22 @@ in a file. One file is created for each lable, so there are ~30 files
 created. Files are named <label>.txt.
 '''
 if __name__ == '__main__':
-    x = []
-    y = []
-    for label in LABELS:
-        files = os.listdir(PATH + label)
-        fx = open('processed/examples.txt', 'w')
-        fy = open('processed/lables.txt', 'w')
-        for file in files:
-            fullpath = PATH + label + '/' + file
-            arr, size = describe(fullpath)
-            if size == 16000:
-                parr = arr.tolist()
-                parr_str = [str(x) for x in arr]
-                fx.write(' '.join(parr_str) + '\n')
-                fy.write(' ' + '\n')
-        fx.close()
-        fy.close()
-        print 'Done with ' + label
+    files = os.listdir('../downloads/test/audio')
+    for idx, file in enumerate(files):
+        if idx % 10000 == 0:
+            print idx
+        in_path = '../downloads/test/audio/' + file
+        out_path = '../processed/test/' + file + '.txt'
+        arr, size = describe(in_path)
+        parr = arr.tolist()
+        parr_str = [str(x) for x in arr] 
+        f = open(out_path, 'w')
+        f.write(' '.join(parr_str))
+        f.close()
+        #fullpath = PATH + label + '/' + file
+        #arr, size = describe(fullpath)
+        #if size == 16000:
+        #    parr = arr.tolist()
+        #    parr_str = [str(x) for x in arr]
+        #    fx.write(' '.join(parr_str) + '\n')
+        #    fy.write(' ' + '\n')

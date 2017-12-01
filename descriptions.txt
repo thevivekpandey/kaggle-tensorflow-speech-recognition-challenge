@@ -1,0 +1,2 @@
+model2: (FC128 + RELU) * 3, 110 cycles, no dropout, accuracy 90%
+model3: (FC128 + RELU) * 3, 110 cycles, dropout of 0.1, accuracy 68.89%

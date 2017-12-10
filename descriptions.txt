@@ -1,2 +1,25 @@
 model2: (FC128 + RELU) * 3, 110 cycles, no dropout, accuracy 90%
 model3: (FC128 + RELU) * 3, 110 cycles, dropout of 0.1, accuracy 68.89%
+model4: (FC128 + RELU) * 3, 170 cycles, no dropout, accuracy 92.88%
+model6: (CONV1D + FC512 + RELU + DROPOUT 0.2)
+         CONV1D has 4 filters, filter length 5, LB 0.23
+model7: Same as above but 8 filters.
+        train accuracy 63%, test accuracy 38, LB 0.27
+model8: Two conv layers: 8 filters in first layer, 4 in second.
+        length 5 and 3 respectively.
+        train accuracy 54%, test accuracy 34%
+model9: Back to one conv layer: 8 filters in first layer, length 5.
+        dropout of 0.5 this time
+        train accuracy 58%, test accuracy 39%
+model10: One conv layer: 8 filters, length *7* 
+        dropout = 0.2
+        train accuracy 63%, test accuracy 39%
+model11: One conv layer: 8 filters, length 7
+         dropout of 0.2
+         learning algo is not rmsprop, but adam
+        train accuracy 76%, test accuracy 51%, LB 0.35
+model12: One conv layer: 12 filters of length 7
+         dropout of 0.2
+         learning algo is adam. Just 3 epochs. More should be better, but
+         1 hour gets exceeded.
+         train accuracy: 81%, test accuracy 53%, LB 0.40

@@ -47,5 +47,8 @@ if __name__ == '__main__':
         if l != 16000:
             print label + ',-1'
         else:
-            p = model.predict(np.array([arr]))
+            #p = model.predict(np.array([arr]))
+             
+            #Need the following when first layer is conv1d
+            p = model.predict(np.array([arr]).reshape(1, 16000, 1))
             print label + ',' + FINAL_I2L[np.argmax(p)]

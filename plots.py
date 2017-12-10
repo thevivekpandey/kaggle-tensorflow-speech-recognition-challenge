@@ -1,21 +1,21 @@
+import os
 import sys
+import librosa
 import matplotlib
 import matplotlib.pyplot as plt
 from constants import LABELS
 matplotlib.use('Agg')
 
 if __name__ == '__main__':
-    for label in LABELS:
+    for label in ['right', 'seven', 'sheila', 'six', 'stop', 'three', 'tree', 'two', 'up', 'wow', 'yes', 'zero']:
         print label
-        f = open('../processed/' + label + '.txt')
-        for count, line in enumerate(f):
-            print count
-            arr_str = line.strip().split(' ')
-            int_arr = [int(x) for x in arr_str]
-            plt.plot(int_arr)
-            plt.savefig('../processed/plots/' + label + '/'  + str(count) + '.png')
+        LABEL_PATH = '../downloads/train/audio/' + label + '/'
+        fs = os.listdir(LABEL_PATH)
+        for idx, f in enumerate(fs):
+            if idx % 100 == 0:
+                print idx
+            arr, r = librosa.load(LABEL_PATH + f)
+
+            plt.plot(arr)
+            plt.savefig('../processed/plots/' + label + '/'  + f + '.png')
             plt.clf()
-            if count == 10:
-                sys.exit(1)
-        print
-        f.close()

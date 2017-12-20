@@ -9,12 +9,13 @@ from keras.utils import np_utils
 from sklearn import metrics 
 from sklearn.model_selection import train_test_split
 import scipy.io.wavfile as wavfile
+import librosa
 import sys
 import os
 
 def describe(fullpath):
-    a, b = wavfile.read(fullpath)
-    return np.array(b) / 32768.0, len(b)
+    arr, b = librosa.load(fullpath, sr=None)
+    return arr, len(arr)
 
 def get_files(train_or_test):
     if train_or_test == 'test':
@@ -44,6 +45,9 @@ if __name__ == '__main__':
 
     print 'fname,label'
     for idx, (label, (arr, l)) in enumerate(get_files(train_or_test)):
+        #mean = np.mean(arr)
+        #std = np.std(arr)
+        #arr = (arr - mean) / std
         if l != 16000:
             print label + ',-1'
         else:

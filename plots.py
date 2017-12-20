@@ -7,7 +7,7 @@ from constants import LABELS
 matplotlib.use('Agg')
 
 if __name__ == '__main__':
-    for label in ['right', 'seven', 'sheila', 'six', 'stop', 'three', 'tree', 'two', 'up', 'wow', 'yes', 'zero']:
+    for label in ['right']:
         print label
         LABEL_PATH = '../downloads/train/audio/' + label + '/'
         fs = os.listdir(LABEL_PATH)
@@ -16,6 +16,8 @@ if __name__ == '__main__':
                 print idx
             arr, r = librosa.load(LABEL_PATH + f)
 
-            plt.plot(arr)
-            plt.savefig('../processed/plots/' + label + '/'  + f + '.png')
+            
+            plt.figure(figsize=(200,7))
+            plt.plot(arr, '-')
+            plt.savefig('../processed/plots1/' + label + '/'  + f + '.png')
             plt.clf()

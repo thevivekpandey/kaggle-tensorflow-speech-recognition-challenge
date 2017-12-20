@@ -23,3 +23,61 @@ model12: One conv layer: 12 filters of length 7
          learning algo is adam. Just 3 epochs. More should be better, but
          1 hour gets exceeded.
          train accuracy: 81%, test accuracy 53%, LB 0.40
+model13: Same as model 12, except we use input normalization.
+         train accuracy: 91%, test accuracy 55%
+         LB 0.39
+model14: One conv layer: 12 filters of size 17
+         Just 2 epochs
+         train accuracy: 80%, test accuracy 63%, LB 0.46
+         *Now onwards, batch size changed from 32 to 128*
+model16: One conv layer, 12 filters of size 19, stride = 5
+         7 epochs
+         train accuracy: 91%, test accuracy 66%, LB 0.47
+model17: One conv layer, 18 filters of size 19, stride = 7
+         5 epochs
+         test accuracy of 67%, LB 0.48
+model18: Two conv layers
+         Layer 1: 12 filters of size 19 stride 5
+         Layer 2: 12 filters of size 7 stride 5
+         Then Flatten (no max pooling)
+         Then FC of size 512
+         Then dropout 0.5, then softmax of size 11
+         train accuracy 99% test accuracy 67.4%, LB 0.48
+model19: Now introduce max pooling
+         Layer 1: 12 filters of size 7 stride 5
+         Layer 2: 12 filters of size 7 stride 5
+         Then max pooling with factor of 2
+         Then Flatten
+         Then FC of size 512
+         Then dropout 0.5, then softmax of size 11
+         7 epochs (then validation acc becomes static)
+         train accuracy 97.6% test accuracy 75.8%, LB 0.50
+model20: One more conv layer of same type. So, now three conv 
+         layers before max pool
+         8 epochs
+         train accuracy:90.4, test accuracy:79.9, LB 0.56
+         difference between train and test accuracy is smaller this time
+
+model21: (Conv 7 of 12 filters stride 5) * 2 + maxpool
+         (Conv 7 of 12 filters stride 5) * 2 + maxpool
+         Two dense layers of size 256 with dropout 0.5
+         train acccuracy: 95.8, test accuracy 87.6 after 80 epochs LB 0.62
+         Going beyond 85 on test is proving to be hard. We need some other
+         mechanism.
+
+model22: kernel size 11 + 3 Dense layers of size 192
+         training: 95.4 test: 87.9 LB 0.60
+
+         *Now, changing gears: let's try to use all data*
+
+model23: Same as model22, 20K training + 2.5K testing, drawn as per
+         distribution in test
+         50 epochs
+         training: 91.2%, test: 72.8%, LB 0.55. Difference between test and
+         LB is smaller, perhaps because now training label distribution is 
+         as per test?
+model24: Everytime new batch of 20K for test, 2.5K for validation
+         training: 91%, test 81.9%, LB 0.65
+model25: Everytime new batch, plus include smaller files in test, 40x2 epochs
+         training: 89.9% test 80.3%, LB 0.62
+         

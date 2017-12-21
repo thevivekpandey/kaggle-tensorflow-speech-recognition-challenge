@@ -80,4 +80,9 @@ model24: Everytime new batch of 20K for test, 2.5K for validation
          training: 91%, test 81.9%, LB 0.65
 model25: Everytime new batch, plus include smaller files in test, 40x2 epochs
          training: 89.9% test 80.3%, LB 0.62
-         
+model26: Silence is here!
+         training: 87.4% test 83.1%, LB 0.68
+model27: (Conv 7 of 12 filters stride 3) * 2 + maxpool
+         (Conv 7 of 18 filters stride 3) * 2 + maxpool
+         Two FCs of 192 neurons with dropout 0.5
+         Training: 83.9, test 76.6

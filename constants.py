@@ -30,7 +30,8 @@ FINAL_I2L = {
     7: 'on',
     8: 'go',
     9: 'yes',
-    10: 'unknown'
+    10: 'unknown',
+    11: 'silence'
 }
 for i, label in enumerate(LABELS):
     LABEL_2_INDEX[label] = i

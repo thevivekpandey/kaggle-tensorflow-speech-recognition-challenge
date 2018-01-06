@@ -26,13 +26,13 @@ def describe(fullpath, n_mfcc, n_mels):
 def get_file(train_or_test, n_mfcc, n_mels):
     wlc = WrongLabelChecker()
     if train_or_test == 'test':
-        base_path = '../downloads/test/audio/'
+        base_path = '../input/tensorflow-speech-recognition-challenge/test/audio/'
         files = os.listdir(base_path)
         for file in files:
             #label is file, so first argument is file
             yield file, describe(base_path + file, n_mfcc, n_mels)
     else:
-        base_path = '../downloads/train/audio/'
+        base_path = '../input/tensorflow-speech-recognition-challenge/train/audio/'
         for label in LABELS:
             files = os.listdir(base_path + label)
             for file in files:
@@ -59,10 +59,10 @@ def one_model_prediction(train_or_test, model_name, params, output_file_1):
     n_mfcc = params['n_mfcc']
     n_mels = params['n_mels']
 
-    json_file = open(model_name + '.json')
+    json_file = open('models/' + model_name + '.json')
     model = model_from_json(json_file.read())
     json_file.close()
-    model.load_weights(model_name + '.h5')
+    model.load_weights('models/' + model_name + '.h5')
     model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='adam')
 
     model_intermediate = Model(inputs=model.input, outputs=model.get_layer('dense_2').output)
@@ -81,9 +81,9 @@ if __name__ == '__main__':
     assert len(sys.argv) == 3
 
     if train_or_test == 'test':
-        output_file = open(model_name + '.out', 'w')
+        output_file = open('models/' + model_name + '.out', 'w')
     else:
-        output_file = open(model_name + '-train.out', 'w')
+        output_file = open('models/' + model_name + '-train.out', 'w')
 
     params = {'n_mfcc': False, 'n_mels': 40}
     #params = {'n_mfcc': False, 'n_mels': False}

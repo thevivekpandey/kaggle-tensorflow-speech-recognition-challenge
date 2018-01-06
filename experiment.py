@@ -180,26 +180,21 @@ def run_keras(model, model_number, n_mfcc, n_mels, silence_vs_non_silence, silen
 
     opt = Adam(lr=0.001, decay=0)
     #opt = keras.optimizers.Adadelta()
-    model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='adam')
+    model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='adam', loss_weights=[1.0, 1.5, 1.0, 1.5, 4])
     #model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer=opt)
-    filepath = "models/model-" + model_number + "-{epoch:03d}-{val_acc:.4f}.h5"
-    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
-    reduce_lr = ReduceLROnPlateau(verbose=1, min_lr = 1e-8, patience=10)
+    filepath = "models/model-" + model_number + "-{epoch:03d}-{val_dense_2_acc:.4f}-{val_dense_4_acc:.4f}-{val_dense_6_acc:.4f}-{val_dense_8_acc:.4f}-{val_dense_10_acc:.4f}.h5"
+    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=0, save_best_only=False, mode='max')
+    reduce_lr = ReduceLROnPlateau(verbose=1, min_lr = 1e-8, patience=5, factor=0.3)
     callbacks = [checkpoint, reduce_lr]
 
     generator = DataGenerator(silence_vs_non_silence=silence_vs_non_silence, silence_too=silence_too, n_mfcc=n_mfcc, n_mels=n_mels)
     training_generator = generator.generate(128, 'train')
     test_generator = generator.generate(128, 'test')
 
-    f = open('accuracies/model' + model_number + '_accuracy.log.txt', 'w')
-    history_callback = model.fit_generator(generator=training_generator, 
-                                           validation_data=test_generator, 
-                                           steps_per_epoch=200,
-                                           validation_steps=20,
-                                           epochs=200,
-                                           callbacks=callbacks)
-    f.write(format(history_callback.history['acc'][0], '.2f') + "," + format(history_callback.history['val_acc'][0], '.2f') + '\n')
-    f.close()
+    model.fit_generator(generator=training_generator, validation_data=test_generator, 
+                        steps_per_epoch=200, validation_steps=20,
+                        epochs=200,
+                        callbacks=callbacks)
     return model
 
 model_number = sys.argv[1]

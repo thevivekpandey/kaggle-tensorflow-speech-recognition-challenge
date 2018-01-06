@@ -472,3 +472,39 @@ Same as model c2 but each input is normalized
 model-c4-031-0.9422-0.9309-0.9488.h5
 
 With silence-r6, it is 0.85
+
+model-c6
+--------
+    branch1:
+        16 * conv-21/2 + batchnorm + relu + maxpool
+        32 * conv-19/2 + batchnorm + relu + maxpool
+            side branch: flatten => dense 256 => dropout 0.5 => softmax 12 (out-a1)
+        64 * conv-17/2 + batchnorm + relu + maxpool
+        128 * conv-15/2 + batchnorm + relu + maxpool
+            side branch: flatten => dense 256 => dropout 0.5 => softmax 12 (out-a2)
+        256 * conv-13/2 + batchnorm + relu + maxpool
+        512 * conv-11/2 + batchnorm + relu + maxpool
+        global max pool
+
+    branch2:
+        128 * conv 3x3/1 + relu
+        128 * conv 3x3/1 + relu
+        maxpool
+            side branch: flatten => dense 256 => dropout 0.5 => softmax 12 (out-b1)
+        128 * conv 3x3/1 + relu
+        128 * conv 3x3/1 + relu
+        128 * conv 3x3/1 + relu
+        128 * conv 3x3/1 + relu
+            side branch: flatten => dense 256 => dropout 0.5 => softmax 12 (out-b2)
+        128 * conv 3x3/1 + relu
+        flatten
+        128 * conv 3x3/1 + relu
+        128 * conv 3x3/1 + relu
+        128 * conv 3x3/1 + relu
+
+    concat = [branch1, branch2]
+    dropout 0.5
+    dense 128
+    dropout 0.5
+    dense 12 softmax: out
+    loss function: out-a1/1, out-a2/2, out-b1/1, out-b2/2, out/4

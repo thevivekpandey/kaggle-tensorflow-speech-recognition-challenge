@@ -85,4 +85,390 @@ model26: Silence is here!
 model27: (Conv 7 of 12 filters stride 3) * 2 + maxpool
          (Conv 7 of 18 filters stride 3) * 2 + maxpool
          Two FCs of 192 neurons with dropout 0.5
-         Training: 83.9, test 76.6
+         Training: 83.9, test 76.6 LB 0.66
+model28: (6 * conv 3/2) * 2 + maxpool
+         (12 * conv 3/2) * 2 + maxpool
+         (18 * conv 3/2) * 2 + maxpool
+         FC 128 * 2
+         training: 71 test 70 LB 40 cycles
+
+model-silence-1:
+         Only predict silence vs non silence
+         (12 * conv 7 / 3) * 2 + maxpool
+         (18 * conv 7 / 3) * 2 + maxpool
+         FC 192 * 2 with dropout 0.5
+         train: 98.8, test: 99. On my system: 7/31 misclassifications
+         Predicts overall 16K silences.
+
+model26 + model-silence-1 gives LB 0.73
+
+model-silence-2:
+        (12 * conv 3 / 1) * 2 + maxpool
+        (18 * conv 3 / 1) * 2 + maxpool
+        FC512 * 2
+        train: 97.8%, test: 98.0%
+        model-silence-2 looked similar to *-1 on the ~150 downloaded samples,
+        but overally predicted 20K silences. 
+
+model26 + model-silence-2 gives LB 0.68
+
+model30: No silence
+         (12 * Conv 11/5) * 2 + maxpool
+         (12 * Conv 11/5) * 2 + maxpool
+         FC 192 * 3
+         Train 77.8%, Test 76.9%
+
+model31: Same as model 26 but without silence
+         (12 * conv 11/5) * 2 + maxpool
+         (18 * conv 11/5) * 2 + maxpool
+         FC256 * 2 with 0.5 dropout
+         Train 87.3, Test 81, LB 0.71
+
+model32: (12 * conv 13/7) * 2 + maxpool
+         (18 * conv 11/5) * 2 + maxpool
+         FC256 * 2 with 0.5 dropout
+         train 82.3, test 77.6
+
+model-silence-3:
+         Same as model 32, 10 epoch training.
+         16K silences. Just right.
+model-silence-4:
+         Same as model 32, 50 epochs training.
+         7.6K silences. Too few.
+model 31 + silence-3:
+         LB 0.71
+model 26 + silence-3:
+         LB 0.73
+       * Now computing on google cloud: 10x faster! *
+model 33: no silence
+         32 * conv 17/2
+         64 * conv 15/2
+        128 * conv 13/2
+        256 * conv 11/2
+        FC 256 * 2
+        train 88, test 84
+        predicts 56K unknowns LB 0.75! (with silence-1)
+model39: no silence
+        8 * conv 5/2
+        16 * conv 5/2
+        32 * conv 5/2
+        64 * conv 5/2
+        128 * conv 5/2
+        256 * conv 5/2
+        2 * FC 256
+        train 96.7 test 87.8
+        predicts 72K unknowns LB 0.78! (with silence-1)
+        I don't understand, with 72K unknown prediction, LB can be 0.78
+model40: no silence
+        8 * conv 13/2
+        16 * conv 11/2
+        32 * conv 9/2
+        64 * conv 7/2
+        128 * conv 5/2
+        256 * conv 3/2
+        2 * FC 256
+        predicts 74K unknowns
+        train 96.9 test 90.3 LB 0.80! (with silence-1)
+
+model41: no silence
+        8 * conv 17/2
+        16 * conv 15/2
+        32 * conv 13/2
+        64 * conv 11/2
+        128 * conv 9/2
+        256 * conv 7/2
+        2 * FC 256
+        test 92%, LB 0.81 (with silence-1)
+
+        with silence-4, it gave LB 0.71
+        with silence-3, it gave LB 0.81
+
+I trained s5 to distinguish between silence and non silence.
+Predicted only 7K silences.
+
+With 41, gave just 0.76.
+
+model62: no silence
+        same as model41, plus
+        (i) synthetic data with noise frac between 0 and 0.1
+        (ii) learning rate decay
+        (iii) GlobalMaxPool1D rather than Flatten
+        training: 96.2, test 92.7
+
+model62 with silence gives LB 0.81
+        Dammit: So, now I have tried everthing except for seperate models
+        for separate words: synthethic data, global maxpool, lr decay.
+        Cleaning up data should be next.
+
+model63: 2 * FC 1024 gives similar result
+
+model64: tried same arch for silence together with others. LB 0.74
+model69:
+          8 * (conv 3/2 + conv 3/1)
+         16 * (conv 3/2 + conv 3/1)
+         32 * (conv 3/2 + conv 3/1)
+         64 * (conv 3/2 + conv 3/1)
+        128 * (conv 3/2 + conv 3/1)
+        256 * (conv 3/2 + conv 3/1)
+        2 * FC 1024
+        test 92%. With slience-1, LB 0.81
+
+silence-s7 seems to be slightly better on silence.
+model-62 > model-69 (We have established that by checking the ranking change)
+
+model-62-and-silence-s7
+model-69-and-silence-s7 both give 0.81
+
+model-69-and-s8 did not help
+model-s9 was a good silence model, but worse thatn silence-1/silence-7.
+You could once just manually pick up the best model among 1/7/8
+
+model76: train on 96% of data
+        8 * conv 17/2 + batch norm + relu + maxpool
+        16 * conv 15/2 + batch norm + relu + maxpool
+        32 * conv 13/2 + batch norm + relu + maxpool
+        64 * conv 11/2 + batch norm + relu + maxpool
+        128 * conv 9/2 + batch norm + relu + maxpool
+        256 * conv 7/2 + batch norm + relu + maxpool
+        2 * FC 256
+        test: 92.7%
+        LB 0.82. An improvement.
+        So, mantra is (i) Get higher accuracy on validation!
+        (ii) Get higher accuracy on labelled test set
+
+model87: train on 96% of data
+        16 * conv 21/2 + batch norm + relu + maxpool
+        32 * conv 17/2 + batch norm + relu + maxpool
+        64 * conv 15/2 + batch norm + relu + maxpool
+        129 * conv 13/2 + batch norm + relu + maxpool
+        256 * conv 11/2 + batch norm + relu + maxpool
+        512 * conv 9/2 + batch norm + relu + maxpool
+        2 * FC 256
+        test 93.7%, LB 0.83. 
+        There was improvment in the labeled test cases.
+        A more trained model: 93.9% got worse score.
+
+model88: with silence gave 0.79
+model89: did not improve the score
+
+model 91: Same as model 87, but with leaky relu
+       test 94.6% (Seemed like a temporary spike in test score)
+       LB 0.82
+
+model94, same as model 87, but with cleaned data
+       test 96.3
+silence-7: same as silnce but with clead data
+
+model94 + silence 7: better on test sample, but LB 0.81
+model94 + silence 1 is better: 0.82
+That is bad: same algo and better data is yield worse results.
+What I am now saying is that since validation set is small, we are
+not getting best possible results. We will restore validatiaon set to 10%.
+And FC layers had selu rather than relu. I'll restore it back to relu.
+****And now, time for MFCC*****
+
+model1: 
+        100 MFCC features
+        12 * (5,5) conv + max pool (2, 2)
+        25 * (5,5) conv + max pool (2, 2)
+        Flatten
+        FC 180 + 100 with dropout 0.5
+        500K params
+        train 81.7, test 83.5
+
+model mfcc-2
+        30 MFCC features
+        8 * (3,3) conv + max pool (2, 2)
+        16 * (3,3) conv + max pool (2, 2)
+        32 * (3,3) conv + max pool (2, 2)
+        Flatten
+        2 * FC 128
+        73K params
+        train 80, test 82
+
+model mfcc-3
+        20 MFCC features
+        32 * (3,3) conv + max pool (2, 2)
+        64 * (3,3) conv + max pool (2, 2)
+        128 * (3,3) conv + max pool (2, 2)
+        256 * (3,3) conv + max pool (2, 2)
+        Flatten
+        2 * FC 128
+        500K params
+        train 89.2, test 90.2
+
+model mfcc-4
+        30 MFCC features
+        32 * (3,3) conv + max pool (2, 2)
+        64 * (3,3) conv + max pool (2, 2)
+        128 * (3,3) conv + max pool (2, 2)
+        256 * (3,3) conv + max pool (2, 2)
+        Flatten
+        2 * FC 128
+        500K params (Exactly same as earlier)
+        Again validation 90.2
+
+model mfcc-5
+       30 MFCC features
+       (32 * (3, 3) conv + relu) * 7
+       maxpool (2, 2)
+       Flatten
+       2 * FC 128
+       1M params
+       
+       When accuracy here is 83%, LB is 0.61
+       When accuracy here is 93.8, LB is 0.73
+
+       If you combine it with s1, it is 0.81
+       Very disappointing. Now I will try stopping the ignoring
+       of wrong examples, plus no noise mixing. Let's first make
+       sure that validation score is alignts with LB.
+       Let's work with 15 MFCC features only and 1 FC layer.
+
+mfcc-9
+      (3, 3) conv + relu
+      followed by 2 * FC256
+      test 0.87
+
+***Now trying off rahul's mel code***
+Straightforward rahuls' code gave 0.83.
+
+r2: This is Rahul's mel model
+    40 MEL features
+    128 * conv 3x3 + relu
+    128 * conv 3x3 + relu
+    maxpool
+    8 * (128 * conv 3x3 + relu)
+    dropout
+    flatten
+    128 FC
+    dropout
+    12 FC
+    6M trainable parameters
+
+    Test 84%
+
+r3: Ada optimizer: test 85%
+
+r6: Same as above, but proportion of all labels is same.
+    train: 98%+, test 93.4%
+
+    mode-r6 gets to 0.84!
+    with silence-1, it is only 0.83!
+    So, your silence model has been defeated.
+
+r7: Same as r6, but now there is augmentation
+    train: 97.7, test 94.5. So, there is diff between train and test
+    LB 0.86!
+
+87 + r7: LB 0.86, but higher ranking. A better ensemble method might help.
+87 + r7: LB 0.86, but higher ranking. This was a better ensemble: we normalized
+the score and gave slightly higher score to r7 model (normalize then *= 0.3)
+
+r8: Same as r7, but now I shift the samples by a random amount. Did not help.
+r9: Highly simplified: just 1 conv layer followed by FC. Not too high a score,
+    but it was growing when I cut it off.
+
+model95: Same as 87, but now we have equal proportion of all categories.
+    test: 96.7, train: 95.7
+    LB 0.83. So, it is not clear whether it is better than model87
+
+ensemble method that we are using:
+method1
+- if model2 predicts silence, it is silence
+- If model2 is > 0.8 sure, follow it
+- if model1 is > 0.9 sure, follow it
+- Follow normalization with 1.03 augmentation for model2 
+
+model95 + r7 gives a score of 0.87! So, model95 was better! I used normalization * 0.03. normalization * 0.02 gave worse resluts. noramlization * .04 also gave
+worse results.
+
+model-r10: various noise colors ada optimizer
+      train: 98.9, test 94.22
+model-r11: various noise colors adam optimizer
+      train: 98.9, test 94.4
+      LB 0.86! Same as model-r11.
+      So, all the noise colors help!
+How to create ensemble:
+method 2
+- If anyone is >0.8 for silence, it is silence
+- If anyone is >0.8 for unknown, it is unknown, unless difference is more than 0.1 in which case we go with normalization
+- If both are < 0.5 and someone says silence, output 
+- Follow normalization
+
+method 2 on 95 + r7 did not work.
+There were 2513 differences. More wrong calls than right calls. But there were
+right calls. How can we isolate those right calls?
+
+r11 + 95 + method1(0.03) yielded 0.86 only. So, how to augment?
+
+model96: Same as 95 but now we have all noise colors in silence as well as
+  mixing with training samples.
+       test 96.3 train 94.7
+  model96-and-silence-1 is 0.82 LB. So, it is wrose than model95, which was LB 0.83
+  (maybe overtraining)
+
+r-s1: predicts silence vs non silence
+     99.4% on test
+r13: similar as r11, but trained without silence
+
+model-95 with r-s1 gives 0.80
+    model-95 with silence-1 had given 0.83. So, r-s1 is bad.
+
+model-c1: first combination model
+          0.81 on LB
+          Next we will try ensemble in combination: Two models will each
+          output softmax 12 outputs and then a two layer FC will combine them.
+
+model-c2:
+          branch1:
+              16 * (conv1/21 + batchnorm + relu + maxpool)
+              32 * (conv1/19 + batchnorm + relu + maxpool)
+              64 * (conv1/17 + batchnorm + relu + maxpool)
+             128 * (conv1/15 + batchnorm + relu + maxpool)
+             256 * (conv1/13 + batchnorm + relu + maxpool)
+             512 * (conv1/11 + batchnorm + relu + maxpool)
+             global max pool
+             fc 256
+             dropout 0.5
+             fc 12 softmax
+
+           branch2:
+            128 * (conv2-3x3, relu)
+            128 * (conv2-3x3, relu)
+            maxpool 2x2
+            128 * (conv2-3x3, relu)
+            128 * (conv2-3x3, relu)
+            128 * (conv2-3x3, relu)
+            128 * (conv2-3x3, relu)
+            128 * (conv2-3x3, relu)
+            128 * (conv2-3x3, relu)
+            128 * (conv2-3x3, relu)
+            128 * (conv2-3x3, relu)
+            dropout 0.5
+            flatten
+            fc 256
+            dropout 0.5
+            fc 12 softmax
+ 
+           combined:
+            concat branch 1 and branch 2
+            fc 32 relu
+            fc 32 relu
+            fc 12 softmax
+           loss weights: 1, 1, 1.5
+
+           model-c2-031-0.9383-0.9418-0.9555.h5
+
+with silence-1, it gives 0.85.
+We trained a bit more, and got 
+model-c2-077-0.9445-0.9367-0.9523.h5. That gave 0.84.
+
+So, higher training can hurt.
+
+model-c4
+--------
+Same as model c2 but each input is normalized
+model-c4-031-0.9422-0.9309-0.9488.h5
+
+With silence-r6, it is 0.85

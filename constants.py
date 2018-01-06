@@ -5,20 +5,6 @@ LABELS_STR += 'two up wow yes zero'
 LABELS = LABELS_STR.split(' ')
 LABEL_2_INDEX = {}
 
-#FINAL_I2L = {
-#    0: 'yes',
-#    1: 'no',
-#    2: 'up',
-#    3: 'down',
-#    4: 'left',
-#    5: 'right',
-#    6: 'on',
-#    7: 'off',
-#    8: 'stop',
-#    9: 'go',
-#    10: 'unknown'
-#}
-
 FINAL_I2L = {
     0: 'up',
     1: 'no',
@@ -33,6 +19,21 @@ FINAL_I2L = {
     10: 'unknown',
     11: 'silence'
 }
+
+#RAHUL_I2L = {
+#    0: 
+#    1:
+#    2:
+#    3:
+#    4:
+#    5:
+#    6:
+#    7:
+#    8:
+#    9:
+#    10: 'unknown',
+#    11: 'silence'
+#}
 for i, label in enumerate(LABELS):
     LABEL_2_INDEX[label] = i
 

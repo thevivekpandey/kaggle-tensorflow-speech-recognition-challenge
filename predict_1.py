@@ -19,13 +19,11 @@ import os
 def describe(fullpath, n_mfcc, n_mels):
     arr, b = librosa.load(fullpath, sr=None)
     arr = np.append(arr, [0] * (16000 - len(arr)))
-    stdev = np.std(arr)
     S = librosa.feature.melspectrogram(arr, sr=16000, n_mels=n_mels)
     spec = librosa.power_to_db(S, ref=np.max)
-    return arr/stdev, spec
-    
+    return np.array(arr), spec
 
-def get_files(train_or_test, n_mfcc, n_mels):
+def get_file(train_or_test, n_mfcc, n_mels):
     wlc = WrongLabelChecker()
     if train_or_test == 'test':
         base_path = '../downloads/test/audio/'
@@ -42,7 +40,22 @@ def get_files(train_or_test, n_mfcc, n_mels):
                 #    continue
                 yield label + '/' + file, describe(base_path + label + '/' + file, n_mfcc, n_mels)
 
-def one_model_prediction(train_or_test, model_name, params, output_file_1, softmax_output_file_1, output_file_2, softmax_output_file_2, output_file_3, softmax_output_file_3):
+def get_shaped_input(train_or_test, n_mfcc, n_mels):
+    dim1 = (16000, 1)
+    dim2 = (n_mels, 32, 1)
+    labels, output1, output2 = [], [], []
+    for label, (arr, spec) in get_file(train_or_test, n_mfcc, n_mels):
+        if len(labels) == 32:
+            yield labels, np.array(output1), np.array(output2)
+            labels, output = [], []
+            output1, output2 = [], []
+           
+        labels.append(label)
+        output1.append(arr.reshape(dim1))
+        output2.append(spec.reshape(dim2))
+    yield labels, np.array(output1), np.array(output2)
+
+def one_model_prediction(train_or_test, model_name, params, output_file_1):
     n_mfcc = params['n_mfcc']
     n_mels = params['n_mels']
 
@@ -54,23 +67,12 @@ def one_model_prediction(train_or_test, model_name, params, output_file_1, softm
 
     model_intermediate = Model(inputs=model.input, outputs=model.get_layer('dense_2').output)
     output_file_1.write('fname,label\n')
-    output_file_2.write('fname,label\n')
-    output_file_3.write('fname,label\n')
-    dim1 = (1, 16000, 1)
-    dim2 = (1, n_mels, 32, 1)
-    for idx, (label, (arr, spec)) in enumerate(get_files(train_or_test, n_mfcc, n_mels)):
-        a = np.array([arr])
-        p = model.predict([a.reshape(dim1), spec.reshape(dim2)])
+    for labels, output1, output2 in get_shaped_input(train_or_test, n_mfcc, n_mels):
+        ps = model.predict_on_batch([output1, output2])
 
-        output_1 = FINAL_I2L[np.argmax(p[0])]
-        output_2 = FINAL_I2L[np.argmax(p[1])]
-        output_3 = FINAL_I2L[np.argmax(p[2])]
-        output_file_1.write(label + ',' + output_1 + '\n')
-        softmax_output_file_1.write(label + '\t' + '\t'.join([str(x) for x in p[0][0]]) + '\t' + output_1 + '\n')
-        output_file_2.write(label + ',' + output_2 + '\n')
-        softmax_output_file_2.write(label + '\t' + '\t'.join([str(x) for x in p[1][0]]) + '\t' + output_2 + '\n')
-        output_file_3.write(label + ',' + output_3 + '\n')
-        softmax_output_file_3.write(label + '\t' + '\t'.join([str(x) for x in p[1][0]]) + '\t' + output_3 + '\n')
+        for l, p in zip(labels, ps[2]):
+            output = FINAL_I2L[np.argmax(p)]
+            output_file.write(l + ',' + output + '\n')
 
 if __name__ == '__main__':
     train_or_test = sys.argv[1]
@@ -79,22 +81,11 @@ if __name__ == '__main__':
     assert len(sys.argv) == 3
 
     if train_or_test == 'test':
-        output_file_1 = open(model_name + '-1.out', 'w')
-        softmax_output_file_1 = open(model_name + '-1-softmax.out', 'w')
-        output_file_2 = open(model_name + '-2.out', 'w')
-        softmax_output_file_2 = open(model_name + '-2-softmax.out', 'w')
-        output_file_3 = open(model_name + '-3.out', 'w')
-        softmax_output_file_3 = open(model_name + '-3-softmax.out', 'w')
+        output_file = open(model_name + '.out', 'w')
     else:
         output_file = open(model_name + '-train.out', 'w')
-        softmax_output_file = open(model_name + '-train-softmax.out', 'w')
 
     params = {'n_mfcc': False, 'n_mels': 40}
     #params = {'n_mfcc': False, 'n_mels': False}
-    one_model_prediction(train_or_test, model_name, params, output_file_1, softmax_output_file_1, output_file_2, softmax_output_file_2, output_file_3, softmax_output_file_3)
-    output_file_1.close()
-    softmax_output_file_1.close()
-    output_file_2.close()
-    softmax_output_file_2.close()
-    output_file_3.close()
-    softmax_output_file_3.close()
+    one_model_prediction(train_or_test, model_name, params, output_file)
+    output_file.close()

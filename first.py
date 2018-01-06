@@ -1,8 +1,12 @@
 import numpy as np
 from constants import PATH, LABELS, LABEL_2_INDEX, INDEX_2_NEW_INDEX
-from keras.models import Sequential
+from keras.models import Sequential, Model
 from keras.layers import Dense, Dropout, Activation, Flatten
-from keras.layers import Convolution2D, MaxPooling2D
+from keras.layers import Convolution2D, MaxPooling2D, Convolution1D
+from keras.layers import Conv1D
+from keras.layers import Input, Dense
+from keras.layers import Concatenate
+import keras.layers
 from keras.optimizers import Adam
 from keras.utils import np_utils
 from sklearn import metrics 
@@ -54,23 +58,35 @@ if __name__ == '__main__':
     #    print y_train[i]
     
     print 'Enter Keras'
-    model = Sequential()
-    model.add(Dense(11, input_shape=(16000,)))
-    model.add(Activation('relu'))
-    
-    model.add(Dense(128))
-    model.add(Activation('relu'))
+    #model = Sequential()
+    #model.add(Dense(11, input_shape=(16000,)))
+    #model.add(Activation('relu'))
+    #
+    #model.add(Dense(128))
+    #model.add(Activation('relu'))
 
-    model.add(Dense(128))
-    model.add(Activation('relu'))
-    
-    model.add(Dense(128))
-    model.add(Activation('relu'))
-    
-    model.add(Dense(11))
-    model.add(Activation('softmax'))
+    #model.add(Dense(128))
+    #model.add(Activation('relu'))
+    #
+    #model.add(Dense(128))
+    #model.add(Activation('relu'))
+    #
+    #model.add(Dense(11))
+    #model.add(Activation('softmax'))
+    a = Input(shape=(16000,1))
+    b = Convolution1D(filters=128, kernel_size=3, activation='relu')(a)
+    c = Flatten()(b)
+
+    a1 = Input(shape=(32, 16, 1))
+    b1 = Convolution2D(129, kernel_size=(3,3), activation='relu')(a1)
+    c1 = Flatten()(b1)
+ 
+    d = keras.layers.concatenate([c, c1])
+    d = Dense(128, activation='relu')(d)
+    model = Model(inputs=[a, a1], outputs=d)
 
     model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='adam')
+    print model.summary()
     #model.fit(x_train, y_train, batch_size=32, nb_epoch=6, validation_data=(x_test, y_test))
     #model.fit(x_data, y_data, batch_size=32, nb_epoch=1)
 
@@ -79,7 +95,7 @@ if __name__ == '__main__':
     #    f.write(model_json)
     #model.save_weights('model-local-2.h5')
     
-    model_yaml = model.to_yaml()
-    with open('model.yaml', 'w') as f:
-        f.write(model_yaml)
-    model.save_weights('model.h5')
+    #model_yaml = model.to_yaml()
+    #with open('model.yaml', 'w') as f:
+    #    f.write(model_yaml)
+    #model.save_weights('model.h5')

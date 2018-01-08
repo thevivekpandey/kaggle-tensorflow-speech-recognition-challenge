@@ -13,6 +13,7 @@ from keras import regularizers
 from data_generator import DataGenerator
 from model_generator import ModelGenerator
 from my_callback import MyCallback
+from heng_cher_keng_model_generator import HengCherKengModelGenerator
 
 def get_conv_model_1():
     model = Sequential()
@@ -182,12 +183,12 @@ def run_keras(model, model_number, n_mfcc, n_mels, silence_vs_non_silence, silen
 
     opt = Adam(lr=0.001, decay=0)
     #opt = keras.optimizers.Adadelta()
-    model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='adam', loss_weights=[1.0, 1.5, 1.0, 1.5, 4])
+    model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='adam', loss_weights=[1.0])
     #model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer=opt)
     filepath = "models/model-" + model_number + "-{epoch:03d}-{val_dense_2_acc:.4f}-{val_dense_4_acc:.4f}-{val_dense_6_acc:.4f}-{val_dense_8_acc:.4f}-{val_dense_10_acc:.4f}.h5"
     checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=0, save_best_only=False, mode='max')
     reduce_lr = ReduceLROnPlateau(verbose=1, min_lr = 1e-8, patience=5, factor=0.3)
-    log_callback = MyCallback(generator)
+    log_callback = MyCallback(generator, model)
     callbacks = [checkpoint, reduce_lr, log_callback]
 
 
@@ -201,11 +202,12 @@ model_number = sys.argv[1]
 silence_vs_non_silence = False
 silence_too = True
 n_mfcc=False
-n_mels = 40
-#n_mels = False
+#n_mels = 40
+n_mels = False
 #model = get_mel_model(silence_vs_non_silence=silence_vs_non_silence, silence_too=silence_too, n_mels=n_mels)
 #model = get_conv_model_1()
-model = ModelGenerator().get_overall_model(n_mels)
+#model = ModelGenerator().get_overall_model(n_mels)
+model = HengCherKengModelGenerator().get_1d_conv_model(n_mels)
 
 print model.summary()
 model_json = model.to_json()

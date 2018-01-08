@@ -61,16 +61,14 @@ class DataGenerator(object):
         while True:
             count += 1
             
-            #x, y = self.get_training_data_batch(N, t)
             x_raw, x_mel, y = self.get_training_data_batch(N, t)
             #if self.n_mfcc:
             #    yield x.reshape(x.shape[0], self.n_mfcc, 32, 1), y
-            #elif self.n_mels:
-            #    yield x.reshape(x.shape[0], self.n_mels, 32, 1), y
-            #else:
-            #    yield x.reshape(x.shape[0], 16000, 1), y
-            yield [x_raw.reshape(x_raw.shape[0], 16000, 1), 
-                   x_mel.reshape(x_mel.shape[0], self.n_mels, 32, 1)], [y, y, y, y, y]
+            if self.n_mels:
+                yield [x_raw.reshape(x_raw.shape[0], 16000, 1), 
+                       x_mel.reshape(x_mel.shape[0], self.n_mels, 32, 1)], [y, y, y, y, y]
+            else:
+                yield x_raw.reshape(x_raw.shape[0], 16000, 1), y
 
     # I will give a batch of N, with labels follwing the above proportions
     # t is type: train or test: I will never give overlapping data for train and test. I will

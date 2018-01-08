@@ -41,7 +41,8 @@ class DataGenerator(object):
 
         self.data = self.get_training_data()
         self.silence_audio = self.get_silence_file()
-        self.NOISE_IDX_2_COLOR= {0: 'white', 1: 'pink', 2: 'blue', 3: 'brown', 4: 'violet'}
+        #self.NOISE_IDX_2_COLOR= {0: 'white', 1: 'pink', 2: 'blue', 3: 'brown', 4: 'violet'} #blue, brown, voiolet noises have not helped
+        self.NOISE_IDX_2_COLOR= {0: 'white', 1: 'pink'}
         
     def shift_arr(self, arr, num):
         result = np.empty_like(arr)
@@ -69,7 +70,7 @@ class DataGenerator(object):
             #else:
             #    yield x.reshape(x.shape[0], 16000, 1), y
             yield [x_raw.reshape(x_raw.shape[0], 16000, 1), 
-                   x_mel.reshape(x_mel.shape[0], self.n_mels, 32, 1)], y
+                   x_mel.reshape(x_mel.shape[0], self.n_mels, 32, 1)], [y, y, y, y, y]
 
     # I will give a batch of N, with labels follwing the above proportions
     # t is type: train or test: I will never give overlapping data for train and test. I will
@@ -87,11 +88,12 @@ class DataGenerator(object):
         # how much to shift each sample
         shifts = np.random.randint(-10, high=10, size=N)
    
-        # With probablity 5%, use file. With probability 95%, use synthetic noise
-        use_file = np.random.random_sample(size=N) < 0.05
+        # With probablity 15%, use file. With probability 85%, use synthetic noise
+        use_file = np.random.random_sample(size=N) < 0.15
 
         # noise colors
-        noise_colors = np.random.randint(0, high=5, size=N)
+        noise_colors = np.random.randint(0, high=2, size=N)
+
         # Within the category, which element to choose
         assert t == 'train' or t == 'test'
         #x, y = [], []
@@ -173,9 +175,10 @@ class DataGenerator(object):
         #    return spec, y
         #else:
         #    return x, y
-        S = librosa.feature.melspectrogram(x, sr=16000, n_mels=self.n_mels)
+        stdev = np.std(x)
+        S = librosa.feature.melspectrogram(x/stdev, sr=16000, n_mels=self.n_mels)
         spec = librosa.power_to_db(S, ref=np.max)
-        return x, spec, y
+        return x/stdev, spec, y
         
     def get_training_data(self):
         overall_x = {}
@@ -193,6 +196,8 @@ class DataGenerator(object):
                 if count % 5000 == 0:
                     print(count)
                 count += 1
+                if count % 100 !=0:
+                    continue
                 arr, b = librosa.load(BASE_PATH + category + '/' + w, sr=None)
                 arr = np.append(arr, [0] * (16000 - len(arr)))
                 assert(len(arr) == 16000)

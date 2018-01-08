@@ -507,4 +507,7 @@ model-c6
     dense 128
     dropout 0.5
     dense 12 softmax: out
-    loss function: out-a1/1, out-a2/2, out-b1/1, out-b2/2, out/4
+    loss function: out-a1/1, out-a2/1.5, out-b1/1, out-b2/1.5, out/4
+
+    0.79 (by itself)
+    with silence: it is 0.80. So, model-c6 is a flop.

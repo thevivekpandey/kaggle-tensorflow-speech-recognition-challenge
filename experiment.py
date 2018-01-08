@@ -1,7 +1,5 @@
 import sys
-import keras
-from keras import Model
-from keras.models import Sequential
+from keras.models import Sequential, Model
 from keras.layers import Dense, Dropout, Activation, Flatten, Input, Concatenate
 from keras.layers import Convolution2D, MaxPooling2D, Convolution1D, MaxPooling1D, Add, GlobalMaxPooling1D, Conv2D
 from keras.layers.normalization import BatchNormalization
@@ -14,6 +12,7 @@ from keras import backend as K
 from keras import regularizers
 from data_generator import DataGenerator
 from model_generator import ModelGenerator
+from my_callback import MyCallback
 
 def get_conv_model_1():
     model = Sequential()
@@ -177,6 +176,9 @@ def get_mfcc_model(n_mfcc):
     return model
 
 def run_keras(model, model_number, n_mfcc, n_mels, silence_vs_non_silence, silence_too):
+    generator = DataGenerator(silence_vs_non_silence=silence_vs_non_silence, silence_too=silence_too, n_mfcc=n_mfcc, n_mels=n_mels)
+    training_generator = generator.generate(128, 'train')
+    test_generator = generator.generate(128, 'test')
 
     opt = Adam(lr=0.001, decay=0)
     #opt = keras.optimizers.Adadelta()
@@ -185,14 +187,12 @@ def run_keras(model, model_number, n_mfcc, n_mels, silence_vs_non_silence, silen
     filepath = "models/model-" + model_number + "-{epoch:03d}-{val_dense_2_acc:.4f}-{val_dense_4_acc:.4f}-{val_dense_6_acc:.4f}-{val_dense_8_acc:.4f}-{val_dense_10_acc:.4f}.h5"
     checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=0, save_best_only=False, mode='max')
     reduce_lr = ReduceLROnPlateau(verbose=1, min_lr = 1e-8, patience=5, factor=0.3)
-    callbacks = [checkpoint, reduce_lr]
+    log_callback = MyCallback(generator)
+    callbacks = [checkpoint, reduce_lr, log_callback]
 
-    generator = DataGenerator(silence_vs_non_silence=silence_vs_non_silence, silence_too=silence_too, n_mfcc=n_mfcc, n_mels=n_mels)
-    training_generator = generator.generate(128, 'train')
-    test_generator = generator.generate(128, 'test')
 
     model.fit_generator(generator=training_generator, validation_data=test_generator, 
-                        steps_per_epoch=200, validation_steps=20,
+                        steps_per_epoch=20, validation_steps=2,
                         epochs=200,
                         callbacks=callbacks)
     return model

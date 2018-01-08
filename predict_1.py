@@ -1,17 +1,12 @@
 import numpy as np
 from constants import PATH, LABELS, LABEL_2_INDEX, FINAL_I2L
-import keras
-from keras.models import Model
-from keras.models import Sequential
+from keras.models import Sequential, Model
 from keras.models import model_from_json
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
 from keras.optimizers import Adam
 from keras.utils import np_utils
-from sklearn import metrics 
-from sklearn.model_selection import train_test_split
 from wrong_label_checker import WrongLabelChecker
-import scipy.io.wavfile as wavfile
 import librosa
 import sys
 import os

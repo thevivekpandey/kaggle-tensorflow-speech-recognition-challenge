@@ -100,8 +100,8 @@ def predict_3(score1, score2):
     for i in range(11):
         #we will normalize score2
         normalized = score2[i] + score2[11] * (score2[i] / (1 - score2[11]))
-        normalized *= 1.03
-        arr.append(score1[i]**0.5 + normalized**0.5)
+        normalized *= 1.02
+        arr.append(score1[i]**0.8 + normalized**0.8)
 
     max_label = -1
     max_prob = 0

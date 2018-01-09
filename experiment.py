@@ -194,7 +194,7 @@ def run_keras(model, model_number, n_mfcc, n_mels, silence_vs_non_silence, silen
 
 
     model.fit_generator(generator=training_generator, validation_data=test_generator, 
-                        steps_per_epoch=20, validation_steps=2,
+                        steps_per_epoch=200, validation_steps=20,
                         epochs=200,
                         callbacks=callbacks)
     return model
@@ -203,12 +203,12 @@ model_number = sys.argv[1]
 silence_vs_non_silence = False
 silence_too = True
 n_mfcc=False
-#n_mels = 40
-n_mels = False
+n_mels = 40
+#n_mels = False
 #model = get_mel_model(silence_vs_non_silence=silence_vs_non_silence, silence_too=silence_too, n_mels=n_mels)
 #model = get_conv_model_1()
-#model = ModelGenerator().get_overall_model(n_mels)
-model = HengCherKengModelGenerator().get_1d_conv_model(n_mels)
+model = ModelGenerator().get_rahul_model(n_mels)
+#model = HengCherKengModelGenerator().get_1d_conv_model(n_mels)
 
 print model.summary()
 model_json = model.to_json()

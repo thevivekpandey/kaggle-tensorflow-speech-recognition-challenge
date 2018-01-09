@@ -14,21 +14,17 @@ class MyCallback(Callback):
         files = os.listdir(self.BASE_PATH)
         for file in files:
             self.filenames.add(file)
-        print list(self.filenames)[1:10]
 
     def on_train_begin(self, logs={}):
-        print 'ON TRAIN BEGIN'
         return
  
     #def on_train_end(self, logs={}):
     #    return
  
     def on_epoch_begin(self, epoch, logs={}):
-        print 'ON EPOCH BEGIN'
         return
  
     def on_epoch_end(self, epoch, logs={}):
-        print 'ON EPOCH END'
         return
  
     #def on_batch_begin(self, batch, logs={}):

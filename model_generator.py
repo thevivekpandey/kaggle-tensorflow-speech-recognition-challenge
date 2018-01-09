@@ -99,6 +99,29 @@ class ModelGenerator():
         model = Model(inputs=[raw_wav, mel_spec], outputs=[outa1, outa2, outb1, outb2, z])
         return model
 
+    def get_rahul_model(self, n_mels):
+        mel_spec = Input(shape=(n_mels, 32, 1))
+        
+        x = Conv2D(128, kernel_size=(3, 3), activation='relu')(mel_spec)
+        x = Conv2D(128, (3, 3), activation='relu', padding='same')(x)
+        x = MaxPooling2D(pool_size=(2, 2))(x)
+       
+        x = Conv2D(128, (3, 3), activation='relu', padding='same')(x)
+        x = Conv2D(128, (3, 3), activation='relu', padding='same')(x)
+        x = Conv2D(128, (3, 3), activation='relu', padding='same')(x)
+        x = Conv2D(128, (3, 3), activation='relu', padding='same')(x)
+
+        x = Conv2D(128, (3, 3), activation='relu', padding='same')(x)
+        x = Conv2D(128, (3, 3), activation='relu', padding='same')(x)
+        x = Conv2D(128, (3, 3), activation='relu', padding='same')(x)
+        x = Conv2D(128, (3, 3), activation='relu', padding='same')(x)
+        x = Flatten()(x)
+        x = Dropout(0.2)(x)
+        x = Dense(128, activation='relu')(x)
+        x = Dropout(0.2)(x)
+        x = Dense(12, activation='softmax')(x)
+        return Model(inputs=mel_spec, outputs=x)
+
 if __name__ == '__main__':
     n_mels = 40
     raw_wav = Input(shape=(16000, 1))

@@ -64,9 +64,11 @@ class DataGenerator(object):
             x_raw, x_mel, y = self.get_training_data_batch(N, t)
             #if self.n_mfcc:
             #    yield x.reshape(x.shape[0], self.n_mfcc, 32, 1), y
+            #if self.n_mels:
+            #    yield [x_raw.reshape(x_raw.shape[0], 16000, 1), 
+            #           x_mel.reshape(x_mel.shape[0], self.n_mels, 32, 1)], [y, y, y, y, y]
             if self.n_mels:
-                yield [x_raw.reshape(x_raw.shape[0], 16000, 1), 
-                       x_mel.reshape(x_mel.shape[0], self.n_mels, 32, 1)], [y, y, y, y, y]
+                yield x_mel.reshape(x_mel.shape[0], self.n_mels, 32, 1), y
             else:
                 yield x_raw.reshape(x_raw.shape[0], 16000, 1), y
 
@@ -92,13 +94,19 @@ class DataGenerator(object):
         # noise colors
         noise_colors = np.random.randint(0, high=2, size=N)
 
+        # flip or not
+        flip_or_not = np.random.randint(0, high=2, size=N)
+
+        # zero silence: 1% of the time we give zero silence file
+        zero_silence = np.random.random_sample(size=N) < 0.01
+
         # Within the category, which element to choose
         assert t == 'train' or t == 'test'
         #x, y = [], []
         x_raw, x_mel, y = [], [], []
         for i in range(N):
             noise_color = self.NOISE_IDX_2_COLOR[noise_colors[i]]
-            one_x_raw, one_x_mel, one_y = self.get_one_training_example(t, rands[i], floats[i], fs[i], shifts[i], use_file[i], noise_color)
+            one_x_raw, one_x_mel, one_y = self.get_one_training_example(t, rands[i], floats[i], fs[i], shifts[i], use_file[i], noise_color, flip_or_not[i], zero_silence[i])
             #one_x, one_y = self.get_one_training_example(t, rands[i], floats[i], 0, 0, use_file[i], noise_color)
             x_raw.append(one_x_raw) 
             x_mel.append(one_x_mel)
@@ -121,16 +129,19 @@ class DataGenerator(object):
         #return n_x, one_hot
         return n_x_raw, n_x_mel, one_hot
 
-    def get_one_training_example(self, t, one_rand, one_float, one_f, one_shift, use_file, noise_color):
+    def get_one_training_example(self, t, one_rand, one_float, one_f, one_shift, use_file, noise_color, flip_or_not, zero_silence):
         label = self.CUMUL[one_rand]
         if label == 11:
             # This is silence
             assert(self.silence_vs_non_silence or self.silence_too)
-            if use_file:
-                r = np.random.randint(len(self.silence_audio) - 16000)
-                x = self.silence_audio[r:r+16000]
+            if zero_silence:
+                x = np.zeros(16000)
             else:
-                x = acoustics.generator.noise(16000, color=noise_color) / 3
+                if use_file:
+                    r = np.random.randint(len(self.silence_audio) - 16000)
+                    x = self.silence_audio[r:r+16000]
+                else:
+                    x = acoustics.generator.noise(16000, color=noise_color) / 3
         else:
             cat_size = self.data[label].shape[0]
             f = 0.90 #What fraction of all data is for training
@@ -173,10 +184,15 @@ class DataGenerator(object):
         #    return spec, y
         #else:
         #    return x, y
+        assert(flip_or_not in (0, 1))
+        if flip_or_not == 1:
+            x = -x
         stdev = np.std(x)
-        S = librosa.feature.melspectrogram(x/stdev, sr=16000, n_mels=self.n_mels)
+        if stdev != 0:
+            x = x/stdev
+        S = librosa.feature.melspectrogram(x, sr=16000, n_mels=self.n_mels if self.n_mels else 40)
         spec = librosa.power_to_db(S, ref=np.max)
-        return x/stdev, spec, y
+        return x, spec, y
         
     def get_training_data(self):
         overall_x = {}
@@ -194,8 +210,8 @@ class DataGenerator(object):
                 if count % 5000 == 0:
                     print(count)
                 count += 1
-                if count % 100 !=0:
-                    continue
+                #if count % 100 !=0:
+                #    continue
                 arr, b = librosa.load(BASE_PATH + category + '/' + w, sr=None)
                 arr = np.append(arr, [0] * (16000 - len(arr)))
                 assert(len(arr) == 16000)

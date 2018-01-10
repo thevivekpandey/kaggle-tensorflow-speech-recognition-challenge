@@ -14,6 +14,9 @@ import os
 def describe(fullpath, n_mfcc, n_mels):
     arr, b = librosa.load(fullpath, sr=None)
     arr = np.append(arr, [0] * (16000 - len(arr)))
+    stdev = np.std(arr)
+    if stdev != 0:
+        arr = arr / stdev
     S = librosa.feature.melspectrogram(arr, sr=16000, n_mels=n_mels)
     spec = librosa.power_to_db(S, ref=np.max)
     return np.array(arr), spec
@@ -36,19 +39,19 @@ def get_file(train_or_test, n_mfcc, n_mels):
                 yield label + '/' + file, describe(base_path + label + '/' + file, n_mfcc, n_mels)
 
 def get_shaped_input(train_or_test, n_mfcc, n_mels):
-    dim1 = (16000, 1)
-    dim2 = (n_mels, 32, 1)
+    dim1 = (1, 16000, 1)
+    dim2 = (1, n_mels, 32, 1)
     labels, output1, output2 = [], [], []
     for label, (arr, spec) in get_file(train_or_test, n_mfcc, n_mels):
-        if len(labels) == 32:
-            yield labels, np.array(output1), np.array(output2)
-            labels, output = [], []
-            output1, output2 = [], []
-           
-        labels.append(label)
-        output1.append(arr.reshape(dim1))
-        output2.append(spec.reshape(dim2))
-    yield labels, np.array(output1), np.array(output2)
+        #if len(labels) == 32:
+        #    yield labels, np.array(output1), np.array(output2)
+        #    labels, output = [], []
+        #    output1, output2 = [], []
+        #   
+        #labels.append(label)
+        #output1.append(arr.reshape(dim1))
+        #output2.append(spec.reshape(dim2))
+        yield label, arr.reshape(dim1), spec.reshape(dim2)
 
 def one_model_prediction(train_or_test, model_name, params, output_file_1):
     n_mfcc = params['n_mfcc']
@@ -60,14 +63,11 @@ def one_model_prediction(train_or_test, model_name, params, output_file_1):
     model.load_weights('models/' + model_name + '.h5')
     model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='adam')
 
-    model_intermediate = Model(inputs=model.input, outputs=model.get_layer('dense_2').output)
     output_file_1.write('fname,label\n')
-    for labels, output1, output2 in get_shaped_input(train_or_test, n_mfcc, n_mels):
-        ps = model.predict_on_batch([output1, output2])
-
-        for l, p in zip(labels, ps[2]):
-            output = FINAL_I2L[np.argmax(p)]
-            output_file.write(l + ',' + output + '\n')
+    for label, output1, output2 in get_shaped_input(train_or_test, n_mfcc, n_mels):
+        p = model.predict(output1)
+        output = FINAL_I2L[np.argmax(p)]
+        output_file.write(label + ',' + output + '\n')
 
 if __name__ == '__main__':
     train_or_test = sys.argv[1]

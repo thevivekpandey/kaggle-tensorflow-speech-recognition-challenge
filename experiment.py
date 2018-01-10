@@ -14,6 +14,7 @@ from data_generator import DataGenerator
 from model_generator import ModelGenerator
 from my_callback import MyCallback
 from heng_cher_keng_model_generator import HengCherKengModelGenerator
+from vgg import VGG
 
 def get_conv_model_1():
     model = Sequential()
@@ -207,8 +208,9 @@ n_mels = 40
 #n_mels = False
 #model = get_mel_model(silence_vs_non_silence=silence_vs_non_silence, silence_too=silence_too, n_mels=n_mels)
 #model = get_conv_model_1()
-model = ModelGenerator().get_rahul_model(n_mels)
+#model = ModelGenerator().get_rahul_model(n_mels)
 #model = HengCherKengModelGenerator().get_1d_conv_model(n_mels)
+model = VGG().vgg(n_mels)
 
 print model.summary()
 model_json = model.to_json()

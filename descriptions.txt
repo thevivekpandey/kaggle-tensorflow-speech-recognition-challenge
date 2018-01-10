@@ -512,3 +512,19 @@ model-c6
     0.79 (by itself)
     with silence: it is 0.80. So, model-c6 is a flop.
 
+
+model-model-h1
+---------------
+https://kaggle2.blob.core.windows.net/forum-message-attachments/265701/8205/simple1d_net.py
+1d conv from heng cher
+93.4 on test
+0.79 on LB.
+0.83 on LB, with silence-1
+
+r-14: same as h1, but with 1% of silence as zero files and half the time you flip the sample 
+    test 94%
+    0.83 on LB with silence-1
+
+r-16: same as h2, but now with sr=16000 while loading, and augment train data also.
+    train 97, validation 95
+    LB 0.85

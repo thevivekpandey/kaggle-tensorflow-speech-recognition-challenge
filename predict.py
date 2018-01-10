@@ -23,7 +23,6 @@ def describe(fullpath, n_mfcc, n_mels):
     S = librosa.feature.melspectrogram(arr, sr=16000, n_mels=n_mels)
     spec = librosa.power_to_db(S, ref=np.max)
     return arr/stdev, spec
-    
 
 def get_files(train_or_test, n_mfcc, n_mels):
     wlc = WrongLabelChecker()

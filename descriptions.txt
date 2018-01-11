@@ -544,4 +544,6 @@ model-vgg-3:
 
 model-vgg-2 predicted very few silences, while model-vgg-3 did not improve with silence-1, so it predicted silences very well.
 
+model-vgg-4:
+   validation: 95.4%
 Now let us ensemble three models: vgg-2, r16, r7, model95

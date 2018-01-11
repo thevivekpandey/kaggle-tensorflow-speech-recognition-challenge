@@ -12,7 +12,7 @@ import sys
 import os
 
 def describe(fullpath, n_mfcc, n_mels):
-    arr, b = librosa.load(fullpath, sr=None)
+    arr, b = librosa.load(fullpath, sr=16000)
     arr = np.append(arr, [0] * (16000 - len(arr)))
     stdev = np.std(arr)
     if stdev != 0:
@@ -65,7 +65,7 @@ def one_model_prediction(train_or_test, model_name, params, output_file_1):
 
     output_file_1.write('fname,label\n')
     for label, output1, output2 in get_shaped_input(train_or_test, n_mfcc, n_mels):
-        p = model.predict(output1)
+        p = model.predict(output2)
         output = FINAL_I2L[np.argmax(p)]
         output_file.write(label + ',' + output + '\n')
 

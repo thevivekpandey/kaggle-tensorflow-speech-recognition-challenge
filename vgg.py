@@ -14,38 +14,86 @@ from keras import regularizers
 
 class VGG():
     def ConvBn2d(self, i, f):
-        x = Convolution2D(f, kernel_size=(3, 3), strides=(1, 1), padding='same')(i)
+        x = Convolution2D(f, kernel_size=(7, 7), strides=(1, 1), padding='same')(i)
         x = BatchNormalization()(x)
         return x
 
-    def vgg(self, n_mels):
+    def vgg3(self, n_mels):
         mel_spec = Input(shape=(n_mels, 32, 1)) 
-        x = self.ConvBn2d(mel_spec, 8)
+        x = self.ConvBn2d(mel_spec, 32)
         x = Activation('relu')(x)
-        x = self.ConvBn2d(x, 8)
+        x = self.ConvBn2d(x, 32)
         x = Activation('relu')(x)
         x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(x)
 
-        x = Dropout(0.2)(x)
-        x = self.ConvBn2d(x, 16)
+        x = Dropout(0.4)(x)
+        x = self.ConvBn2d(x, 128)
         x = Activation('relu')(x)
-        x = self.ConvBn2d(x, 16)
+        x = self.ConvBn2d(x, 128)
         x = Activation('relu')(x)
         x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(x)
         
-        x = Dropout(0.2)(x)
-        x = self.ConvBn2d(x, 32)
+        x = Dropout(0.4)(x)
+        x = self.ConvBn2d(x, 512)
         x = Activation('relu')(x)
-        x = self.ConvBn2d(x, 32)
+        x = self.ConvBn2d(x, 512)
         x = Activation('relu')(x)
         x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(x)
 
         x = Dropout(0.2)(x)
+        x = self.ConvBn2d(x, 1024)
+        x = Activation('relu')(x)
+        x = self.ConvBn2d(x, 1024)
+        x = Activation('relu')(x)
+        x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(x)
+
+        x = Dropout(0.4)(x)
         x = Flatten()(x)
         x = Dense(512)(x)
         x = Activation('relu')(x)
         
+        x = Dropout(0.4)(x)
+        x = Dense(256)(x)
+        x = Activation('relu')(x)
+        
+        x = Dense(12, activation='softmax')(x)
+        return Model(inputs=mel_spec, outputs=x)
+
+    def vgg4(self, n_mels):
+        mel_spec = Input(shape=(n_mels, 32, 1)) 
+        x = self.ConvBn2d(mel_spec, 32)
+        x = Activation('relu')(x)
+        x = self.ConvBn2d(x, 32)
+        x = Activation('relu')(x)
+        x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(x)
+
+        x = Dropout(0.4)(x)
+        x = self.ConvBn2d(x, 128)
+        x = Activation('relu')(x)
+        x = self.ConvBn2d(x, 128)
+        x = Activation('relu')(x)
+        x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(x)
+        
+        x = Dropout(0.4)(x)
+        x = self.ConvBn2d(x, 512)
+        x = Activation('relu')(x)
+        x = self.ConvBn2d(x, 512)
+        x = Activation('relu')(x)
+        x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(x)
+
         x = Dropout(0.2)(x)
+        x = self.ConvBn2d(x, 1024)
+        x = Activation('relu')(x)
+        x = self.ConvBn2d(x, 1024)
+        x = Activation('relu')(x)
+        x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(x)
+
+        x = Dropout(0.4)(x)
+        x = Flatten()(x)
+        x = Dense(512)(x)
+        x = Activation('relu')(x)
+        
+        x = Dropout(0.4)(x)
         x = Dense(256)(x)
         x = Activation('relu')(x)
         

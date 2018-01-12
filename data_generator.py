@@ -89,7 +89,7 @@ class DataGenerator(object):
         shifts = np.random.randint(-10, high=10, size=N)
    
         # With probablity 15%, use file. With probability 85%, use synthetic noise
-        use_file = np.random.random_sample(size=N) < 0.15
+        use_file = np.random.random_sample(size=N) < 0.50
 
         # noise colors
         noise_colors = np.random.randint(0, high=2, size=N)
@@ -141,7 +141,7 @@ class DataGenerator(object):
                     r = np.random.randint(len(self.silence_audio) - 16000)
                     x = self.silence_audio[r:r+16000]
                 else:
-                    x = acoustics.generator.noise(16000, color=noise_color) / 3
+                    x = acoustics.generator.noise(16000, color=noise_color) / 10
         else:
             cat_size = self.data[label].shape[0]
             f = 0.90 #What fraction of all data is for training
@@ -154,14 +154,14 @@ class DataGenerator(object):
             # From category = label, I'll choose idx'th sample
             # I'll combine it with some noise
     
-            if t == 'train':
+            if t == 'train' or t == 'test':
                 #r = np.random.randint(len(self.silence_audio) - 16000)
                 #noise = self.silence_audio[r:r+16000]
                 if use_file:
                     r = np.random.randint(len(self.silence_audio) - 16000)
                     noise = self.silence_audio[r:r+16000]
                 else:
-                    noise = acoustics.generator.noise(16000, color=noise_color) / 3
+                    noise = acoustics.generator.noise(16000, color=noise_color) / 30
                  
                 shifted_data = self.shift_arr(self.data[label][idx], one_shift)
                 x = one_f * noise + (1 - one_f) * shifted_data
@@ -212,7 +212,7 @@ class DataGenerator(object):
                 count += 1
                 #if count % 100 !=0:
                 #    continue
-                arr, b = librosa.load(BASE_PATH + category + '/' + w, sr=None)
+                arr, b = librosa.load(BASE_PATH + category + '/' + w, sr=16000)
                 arr = np.append(arr, [0] * (16000 - len(arr)))
                 assert(len(arr) == 16000)
                 temp_x.append(arr)
@@ -228,7 +228,7 @@ class DataGenerator(object):
     def get_silence_file(self):
         #Make one big silence file
         ws = os.listdir(BASE_PATH + '_background_noise_/')
-        total_arr, b = librosa.load(BASE_PATH + '_background_noise_/running_tap.wav', sr=None)
+        total_arr, b = librosa.load(BASE_PATH + '_background_noise_/running_tap.wav', sr=16000)
         for w in ws:
             # colored noises are generated at runtime
             if w in ['README.md', 'running_tap.wav', 'pink_noise.wav', 'white_noise.wav']:

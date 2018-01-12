@@ -110,7 +110,20 @@ def predict_3(score1, score2):
             max_label = i
             max_prob = arr[i]
     return FINAL_I2L[max_label]
-       
+ 
+def predict_4(score1, score2):
+    arr = []
+    for i in range(12):
+        arr.append(score1[i]**0.5 + score2[i]**0.5)
+
+    max_label = -1
+    max_prob = 0
+    for i in range(12):
+        if arr[i] > max_prob:
+            max_label = i
+            max_prob = arr[i]
+    return FINAL_I2L[max_label]
+    
 print 'fname,label'
 dict1, dict2 = {}, {}
 f1_name = sys.argv[1] #1d conv: does not contain silence prediction
@@ -141,4 +154,4 @@ for line in f2:
 f2.close()
 
 for clip, scores in dict2.iteritems():
-    print clip + ',' + predict_3(dict1[clip], dict2[clip])
+    print clip + ',' + predict_4(dict1[clip], dict2[clip])

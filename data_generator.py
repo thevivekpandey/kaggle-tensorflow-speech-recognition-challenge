@@ -237,3 +237,16 @@ class DataGenerator(object):
     
             total_arr = np.append(total_arr, arr)
         return total_arr
+
+    def print_num_data_points(self):
+        for label in self.data:
+            print label, len(self.data[label])
+
+    def add_data(self, labels, arrs):
+        print 'before'
+        self.print_num_data_points()
+        for (label, arr) in zip(labels, arrs):
+            if label == 'silence':
+                pass
+            else:
+                self.data[label] = np.append(self.data[label], np.array(arr))

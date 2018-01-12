@@ -17,22 +17,6 @@ class MyCallback(Callback):
         for file in files:
             self.filenames.add(file)
 
-    def on_train_begin(self, logs={}):
-        return
- 
-    #def on_train_end(self, logs={}):
-    #    return
- 
-    def on_epoch_begin(self, epoch, logs={}):
-        return
- 
     def on_epoch_end(self, epoch, logs={}):
         print 'I see that epoch is ', epoch
- 
-    #def on_batch_begin(self, batch, logs={}):
-    #    print 'Batch has begun'
-    #    return
- 
-    def on_batch_end(self, batch, logs={}):
-        #self.losses.append(logs.get('loss'))
-        return
+        self.data_generator.add_data([0, 1], [[0]*16000, [0]*16000])

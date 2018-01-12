@@ -23,49 +23,60 @@ def get_conv_model_1():
     model.add(Convolution1D(filters=16, kernel_size=21, strides=strides, padding='same', input_shape=(16000,1)))
     model.add(BatchNormalization())
     model.add(Activation('relu'))
-    #model.add(LeakyReLU())
     model.add(MaxPooling1D(padding='same'))
 
     model.add(Convolution1D(filters=32, kernel_size=19, strides=strides, padding='same'))
     model.add(BatchNormalization())
     model.add(Activation('relu'))
-    #model.add(LeakyReLU())
     model.add(MaxPooling1D(padding='same'))
 
     model.add(Convolution1D(filters=64, kernel_size=17, strides=strides, padding='same'))
     model.add(BatchNormalization())
     model.add(Activation('relu'))
-    #model.add(LeakyReLU())
     model.add(MaxPooling1D(padding='same'))
 
     model.add(Convolution1D(filters=128, kernel_size=15, strides=strides, padding='same'))
     model.add(BatchNormalization())
     model.add(Activation('relu'))
-    #model.add(LeakyReLU())
     model.add(MaxPooling1D(padding='same'))
 
     model.add(Convolution1D(filters=256, kernel_size=13, strides=strides, padding='same'))
     model.add(BatchNormalization())
     model.add(Activation('relu'))
-    #model.add(LeakyReLU())
     model.add(MaxPooling1D(padding='same'))
 
     model.add(Convolution1D(filters=512, kernel_size=11, strides=strides, padding='same'))
     model.add(BatchNormalization())
     model.add(Activation('relu'))
-    #model.add(LeakyReLU())
     model.add(MaxPooling1D(padding='same'))
 
-    #model.add(Convolution1D(filters=1024, kernel_size=9, strides=strides, padding='same'))
-    #model.add(BatchNormalization())
-    #model.add(Activation('relu'))
-    #model.add(MaxPooling1D(padding='same'))
+    model.add(Convolution1D(filters=1024, kernel_size=9, strides=strides, padding='same'))
+    model.add(BatchNormalization())
+    model.add(Activation('relu'))
+    model.add(MaxPooling1D(padding='same'))
 
-    #model.add(Flatten())
+    model.add(Convolution1D(filters=2048, kernel_size=7, strides=strides, padding='same'))
+    model.add(BatchNormalization())
+    model.add(Activation('relu'))
+    model.add(MaxPooling1D(padding='same'))
+
+    model.add(Convolution1D(filters=4096, kernel_size=5, strides=strides, padding='same'))
+    model.add(BatchNormalization())
+    model.add(Activation('relu'))
+    model.add(MaxPooling1D(padding='same'))
+
+    model.add(Convolution1D(filters=9192, kernel_size=3, strides=strides, padding='same'))
+    model.add(BatchNormalization())
+    model.add(Activation('relu'))
+    model.add(MaxPooling1D(padding='same'))
+
+    model.add(Convolution1D(filters=9192, kernel_size=3, strides=strides, padding='same'))
+    model.add(BatchNormalization())
+    model.add(Activation('relu'))
+    model.add(MaxPooling1D(padding='same'))
+
     model.add(GlobalMaxPooling1D())
     
-    model.add(Dense(256, kernel_initializer='glorot_normal', activation='relu'))
-    model.add(Dropout(0.5))
     model.add(Dense(256, kernel_initializer='glorot_normal', activation='relu'))
     model.add(Dropout(0.5))
 
@@ -191,7 +202,7 @@ def run_keras(model, model_number, n_mfcc, n_mels, silence_vs_non_silence, silen
     checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=0, save_best_only=True, mode='max')
     reduce_lr = ReduceLROnPlateau(verbose=1, min_lr = 1e-8, patience=5, factor=0.3)
     log_callback = MyCallback(generator, model)
-    callbacks = [checkpoint, reduce_lr]
+    callbacks = [checkpoint, reduce_lr, log_callback]
 
 
     model.fit_generator(generator=training_generator, validation_data=test_generator, 
@@ -204,12 +215,12 @@ model_number = sys.argv[1]
 silence_vs_non_silence = False
 silence_too = True
 n_mfcc=False
-#n_mels = 40
-n_mels = False
+n_mels = 40
+#n_mels = False
 #model = get_mel_model(silence_vs_non_silence=silence_vs_non_silence, silence_too=silence_too, n_mels=n_mels)
-#model = get_conv_model_1()
-#model = ModelGenerator().get_rahul_model(n_mels)
-model = HengCherKengModelGenerator().get_1d_conv_model_2()
+model = get_conv_model_1()
+#model = ModelGenerator().get_temp_model(n_mels)
+#model = HengCherKengModelGenerator().get_1d_conv_model_2()
 #model = VGG().vgg4(n_mels)
 
 print model.summary()

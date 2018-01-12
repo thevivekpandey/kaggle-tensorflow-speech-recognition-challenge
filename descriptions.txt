@@ -528,3 +528,22 @@ r-14: same as h1, but with 1% of silence as zero files and half the time you fli
 r-16: same as h2, but now with sr=16000 while loading, and augment train data also.
     train 97, validation 95
     LB 0.85
+    with silence-1 also it is 0.85
+
+model-vgg-2:
+    valiation: 94%, LB 0.87, best till now.
+    (with silence)
+    kernel size was 3x3
+
+model-vgg-3:
+    validation: 95.7%, LB 0.87, best till now!
+    with-silence-1: no improvement.
+    So, now be conservative with silence-1 and see
+    where you can improve
+    kernel size was 5x5
+
+model-vgg-2 predicted very few silences, while model-vgg-3 did not improve with silence-1, so it predicted silences very well.
+
+model-vgg-4:
+   validation: 95.4%
+Now let us ensemble three models: vgg-2, r16, r7, model95

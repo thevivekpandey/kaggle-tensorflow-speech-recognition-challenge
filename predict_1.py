@@ -12,7 +12,7 @@ import sys
 import os
 
 def describe(fullpath, n_mfcc, n_mels):
-    arr, b = librosa.load(fullpath, sr=None)
+    arr, b = librosa.load(fullpath, sr=16000)
     arr = np.append(arr, [0] * (16000 - len(arr)))
     stdev = np.std(arr)
     if stdev != 0:
@@ -53,7 +53,7 @@ def get_shaped_input(train_or_test, n_mfcc, n_mels):
         #output2.append(spec.reshape(dim2))
         yield label, arr.reshape(dim1), spec.reshape(dim2)
 
-def one_model_prediction(train_or_test, model_name, params, output_file_1):
+def one_model_prediction(train_or_test, model_name, params, output_file, output_file_softmax):
     n_mfcc = params['n_mfcc']
     n_mels = params['n_mels']
 
@@ -63,11 +63,12 @@ def one_model_prediction(train_or_test, model_name, params, output_file_1):
     model.load_weights('models/' + model_name + '.h5')
     model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='adam')
 
-    output_file_1.write('fname,label\n')
+    output_file.write('fname,label\n')
     for label, output1, output2 in get_shaped_input(train_or_test, n_mfcc, n_mels):
-        p = model.predict(output1)
+        p = model.predict(output2)
         output = FINAL_I2L[np.argmax(p)]
         output_file.write(label + ',' + output + '\n')
+        output_file_softmax.write(label + '\t' + '\t'.join([str(x) for x in p[0]]) + '\t' + output + '\n')
 
 if __name__ == '__main__':
     train_or_test = sys.argv[1]
@@ -77,10 +78,12 @@ if __name__ == '__main__':
 
     if train_or_test == 'test':
         output_file = open('models/' + model_name + '.out', 'w')
+        output_file_softmax = open('models/' + model_name + '-softmax.out', 'w')
     else:
         output_file = open('models/' + model_name + '-train.out', 'w')
+        output_file_softmax = open('models/' + model_name + '-train-softmax.out', 'w')
 
     params = {'n_mfcc': False, 'n_mels': 40}
     #params = {'n_mfcc': False, 'n_mels': False}
-    one_model_prediction(train_or_test, model_name, params, output_file)
+    one_model_prediction(train_or_test, model_name, params, output_file, output_file_softmax)
     output_file.close()

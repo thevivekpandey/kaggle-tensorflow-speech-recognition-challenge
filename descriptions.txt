@@ -512,7 +512,6 @@ model-c6
     0.79 (by itself)
     with silence: it is 0.80. So, model-c6 is a flop.
 
-
 model-model-h1
 ---------------
 https://kaggle2.blob.core.windows.net/forum-message-attachments/265701/8205/simple1d_net.py
@@ -546,8 +545,23 @@ model-vgg-2 predicted very few silences, while model-vgg-3 did not improve with 
 
 model-vgg-4:
    validation: 95.4%, LB 0.87
-Now let us ensemble three models: vgg-2, r16, r7, model95
 
 ensemble of vgg-3 with r7 give 0.88. Ensemble helps. How can we 
 make it more and more powerful?
 
+Now should we five models: vgg-2 (0.87), r16 (0.85), r7 (0.86), model95 (0.83), vgg-4 (0.87)
+
+Let's just take top guys: vgg2, vgg4 and r7. This ensemble gives 0.88, but it is on the
+higher side. Metric is score[vgg2]**0.5 + score[vgg4]**0.5 + score[r7]**0.5
+
+Weigh down r7 slightly. Did not improve.
+
+4 model ensemble: including r7 in mix, lands me at 38. Moved further up. Best till now.
+
+A slightly better ensembling give me 0.89!
+
+model 96 (A deep model from 1d conv world): 95.4 on test.
+
+vgg-5: same as vgg-4, but now 15% of times, we do not mix noise with samples. [Running on bajrang-10]: Reaches test accuracy of 96.8%.
+
+model-h2: running on bajrang-9 is super deep get_1d_conv_model_2

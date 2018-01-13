@@ -242,11 +242,13 @@ class DataGenerator(object):
         for label in self.data:
             print label, len(self.data[label])
 
-    def add_data(self, labels, arrs):
+    def add_data(self, labels, np_arrs):
         print 'before'
         self.print_num_data_points()
-        for (label, arr) in zip(labels, arrs):
-            if label == 'silence':
-                pass
+        for (label, np_arr) in zip(labels, np_arrs):
+            if label == 11:
+                self.silence_audio = np.append(self.silence_audio, np_arr)
             else:
-                self.data[label] = np.append(self.data[label], np.array(arr))
+                self.data[label] = np.append(self.data[label], [np.array(np_arr)], axis=0)
+        print 'after'
+        self.print_num_data_points()

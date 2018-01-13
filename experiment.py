@@ -12,6 +12,7 @@ from keras import backend as K
 from keras import regularizers
 from data_generator import DataGenerator
 from model_generator import ModelGenerator
+from prediction_engine import PredictionEngine
 from my_callback import MyCallback
 from heng_cher_keng_model_generator import HengCherKengModelGenerator
 from vgg import VGG
@@ -201,12 +202,12 @@ def run_keras(model, model_number, n_mfcc, n_mels, silence_vs_non_silence, silen
     filepath = "models/model-" + model_number + "-{epoch:03d}-{val_acc:.4f}.h5"
     checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=0, save_best_only=True, mode='max')
     reduce_lr = ReduceLROnPlateau(verbose=1, min_lr = 1e-8, patience=5, factor=0.3)
-    log_callback = MyCallback(generator, model)
+    prediction_engine = PredictionEngine(n_mfcc, n_mels)
+    log_callback = MyCallback(generator, prediction_engine, model_number)
     callbacks = [checkpoint, reduce_lr, log_callback]
 
-
     model.fit_generator(generator=training_generator, validation_data=test_generator, 
-                        steps_per_epoch=200, validation_steps=20,
+                        steps_per_epoch=50, validation_steps=5,
                         epochs=200,
                         callbacks=callbacks)
     return model
@@ -218,8 +219,8 @@ n_mfcc=False
 n_mels = 40
 #n_mels = False
 #model = get_mel_model(silence_vs_non_silence=silence_vs_non_silence, silence_too=silence_too, n_mels=n_mels)
-model = get_conv_model_1()
-#model = ModelGenerator().get_temp_model(n_mels)
+#model = get_conv_model_1()
+model = ModelGenerator().get_temp_model(n_mels)
 #model = HengCherKengModelGenerator().get_1d_conv_model_2()
 #model = VGG().vgg4(n_mels)
 

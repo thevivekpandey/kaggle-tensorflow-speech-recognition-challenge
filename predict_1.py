@@ -65,7 +65,7 @@ def one_model_prediction(train_or_test, model_name, params, output_file, output_
 
     output_file.write('fname,label\n')
     for label, output1, output2 in get_shaped_input(train_or_test, n_mfcc, n_mels):
-        p = model.predict(output2)
+        p = model.predict(output1)
         output = FINAL_I2L[np.argmax(p)]
         output_file.write(label + ',' + output + '\n')
         output_file_softmax.write(label + '\t' + '\t'.join([str(x) for x in p[0]]) + '\t' + output + '\n')

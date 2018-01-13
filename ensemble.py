@@ -111,10 +111,11 @@ def predict_3(score1, score2):
             max_prob = arr[i]
     return FINAL_I2L[max_label]
  
-def predict_4(score1, score2):
+def predict_4(scores):
     arr = []
     for i in range(12):
-        arr.append(score1[i]**0.5 + score2[i]**0.5)
+        #arr.append(sum([score[i] ** 0.5 for score in scores]))
+        arr.append((scores[0][i] * 0.98)**0.5 + scores[1][i]**0.5 + scores[2][i]**0.5)
 
     max_label = -1
     max_prob = 0
@@ -124,34 +125,67 @@ def predict_4(score1, score2):
             max_prob = arr[i]
     return FINAL_I2L[max_label]
     
-print 'fname,label'
-dict1, dict2 = {}, {}
-f1_name = sys.argv[1] #1d conv: does not contain silence prediction
-f2_name = sys.argv[2] #mel model: contains silence prediction
+def predict_5(scores):
+    arr = []
+    for i in range(12):
+        arr.append((scores[1][i])**2.0 + scores[2][i]**2.0 + scores[3][i]**2.0)
 
-f1 = open(f1_name)
-for line in f1:
-    if line.strip() == 'fname,label':
-        continue
-    parts = line.strip().split('\t')
-    clip = parts[0]
-    nums = [float(s) for s in parts[1:-1]]
-    dict1[clip] = {}
-    for idx, num in enumerate(nums):
-        dict1[clip][idx] = num
-f1.close()
+    max_label = -1
+    max_prob = 0
+    for i in range(12):
+        if arr[i] > max_prob:
+            max_label = i
+            max_prob = arr[i]
+    #If first 3 guys rule silence, silence it is
+    if max_label == 11:
+        return FINAL_I2L[max_label]
+    
+    #If first 3 guys rule something other than silence, we vote again
+    arr = []
+    for i in range(11):
+        #arr.append(sum([score[i] ** 0.5 for score in scores]))
+        part0 = scores[0][i] * 0.99
+        part1 = scores[1][i] / (1 - scores[1][11])
+        part2 = scores[2][i] / (1 - scores[2][11])
+        part3 = scores[3][i] / (1 - scores[3][11])
+        arr.append(part0**0.1 + part1**0.1 + part2**0.1 + part3**0.1)
 
-f2 = open(f2_name)
-for line in f2:
-    if line.strip() == 'fname,label':
-        continue
-    parts = line.strip().split('\t')
-    clip = parts[0]
-    nums = [float(s) for s in parts[1:-1]]
-    dict2[clip] = {}
-    for idx, num in enumerate(nums):
-        dict2[clip][idx] = num
-f2.close()
+    max_label = -1
+    max_prob = 0
+    for i in range(11):
+        if arr[i] > max_prob:
+            max_label = i
+            max_prob = arr[i]
+    return FINAL_I2L[max_label]
+    
 
-for clip, scores in dict2.iteritems():
-    print clip + ',' + predict_4(dict1[clip], dict2[clip])
+
+
+def load_scores_from_file(fname):
+    my_dict = {}
+    f = open(fname)
+    for line in f:
+        if line.strip() == 'fname,label':
+            continue
+        parts = line.strip().split('\t')
+        clip = parts[0]
+        nums = [float(s) for s in parts[1:-1]]
+        my_dict[clip] = {}
+        for idx, num in enumerate(nums):
+            my_dict[clip][idx] = num
+    f.close()
+    return my_dict
+
+if __name__ == '__main__':
+    dict1, dict2 = {}, {}
+    fnames = sys.argv[1:]
+    scores = {}
+    
+    for f in fnames:
+        scores[f] = load_scores_from_file(f)
+ 
+    print 'fname,label'
+    clips = scores[fnames[0]].keys()
+    for clip in clips:
+        one_clip_score = [scores[f][clip] for f in fnames] 
+        print clip + ',' + predict_5(one_clip_score)

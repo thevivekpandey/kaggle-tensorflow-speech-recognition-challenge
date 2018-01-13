@@ -564,4 +564,4 @@ model 96 (A deep model from 1d conv world): 95.4 on test.
 
 vgg-5: same as vgg-4, but now 15% of times, we do not mix noise with samples. [Running on bajrang-10]: Reaches test accuracy of 96.8%.
 
-model-h2: running on bajrang-9 is super deep get_1d_conv_model_2
+model-h2: running on bajrang-9 is super deep get_1d_conv_model_2. Reaches test accuracy of 96.1

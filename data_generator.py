@@ -82,6 +82,9 @@ class DataGenerator(object):
 
         floats = np.random.random_sample(size=N)
 
+        #Whether or not to mix with noise
+        mix_with_noise = np.random.random_sample(size=N) < 0.05
+
         # fs are used to combine noise with signal. I don't give weightage of more than 0.25 to noise
         fs = np.random.random_sample(size=N) / 10
 
@@ -106,7 +109,7 @@ class DataGenerator(object):
         x_raw, x_mel, y = [], [], []
         for i in range(N):
             noise_color = self.NOISE_IDX_2_COLOR[noise_colors[i]]
-            one_x_raw, one_x_mel, one_y = self.get_one_training_example(t, rands[i], floats[i], fs[i], shifts[i], use_file[i], noise_color, flip_or_not[i], zero_silence[i])
+            one_x_raw, one_x_mel, one_y = self.get_one_training_example(t, rands[i], floats[i], mix_with_noise[i], fs[i], shifts[i], use_file[i], noise_color, flip_or_not[i], zero_silence[i])
             #one_x, one_y = self.get_one_training_example(t, rands[i], floats[i], 0, 0, use_file[i], noise_color)
             x_raw.append(one_x_raw) 
             x_mel.append(one_x_mel)
@@ -129,7 +132,7 @@ class DataGenerator(object):
         #return n_x, one_hot
         return n_x_raw, n_x_mel, one_hot
 
-    def get_one_training_example(self, t, one_rand, one_float, one_f, one_shift, use_file, noise_color, flip_or_not, zero_silence):
+    def get_one_training_example(self, t, one_rand, one_float, mix_with_noise, one_f, one_shift, use_file, noise_color, flip_or_not, zero_silence):
         label = self.CUMUL[one_rand]
         if label == 11:
             # This is silence
@@ -150,23 +153,20 @@ class DataGenerator(object):
             else:
                 frac = f + one_float * (1 - f)
     
-            idx = int(frac * cat_size) 
             # From category = label, I'll choose idx'th sample
-            # I'll combine it with some noise
-    
-            if t == 'train' or t == 'test':
-                #r = np.random.randint(len(self.silence_audio) - 16000)
-                #noise = self.silence_audio[r:r+16000]
-                if use_file:
-                    r = np.random.randint(len(self.silence_audio) - 16000)
-                    noise = self.silence_audio[r:r+16000]
-                else:
-                    noise = acoustics.generator.noise(16000, color=noise_color) / 30
-                 
-                shifted_data = self.shift_arr(self.data[label][idx], one_shift)
+            idx = int(frac * cat_size) 
+
+            if use_file:
+                r = np.random.randint(len(self.silence_audio) - 16000)
+                noise = self.silence_audio[r:r+16000]
+            else:
+                noise = acoustics.generator.noise(16000, color=noise_color) / 30
+
+            shifted_data = self.shift_arr(self.data[label][idx], one_shift)
+            if mix_with_noise:
                 x = one_f * noise + (1 - one_f) * shifted_data
             else:
-                x = self.data[label][idx]
+                x = shifted_data
             
         if self.silence_vs_non_silence:
             if label == 11:

@@ -560,8 +560,25 @@ Weigh down r7 slightly. Did not improve.
 
 A slightly better ensembling give me 0.89!
 
-model 96 (A deep model from 1d conv world): 95.4 on test.
+model 96 (A deep model from 1d conv world): 95.4 on test. Only 0.84 on LB.
 
-vgg-5: same as vgg-4, but now 15% of times, we do not mix noise with samples. [Running on bajrang-10]: Reaches test accuracy of 96.8%.
+vgg-5: same as vgg-4, but now 15% of times, we do not mix noise with samples. [Running on bajrang-10]: Reaches test accuracy of 96.8%. LB 0.87
 
-model-h2: running on bajrang-9 is super deep get_1d_conv_model_2. Reaches test accuracy of 96.1
+Ensembling 95, r7, vgg3, vgg4, vgg5 did not improve the score.
+Ensembling 95, r7, vgg3, vgg5 gave only 0.88
+
+model-h2: running on bajrang-9 is super deep get_1d_conv_model_2. Reaches test accuracy of 96.1. LB 0.86
+
+model-97:
+    16 * (conv 21/2 + bn + relu + maxpool)
+    32 * (conv 19/2 + bn + relu + maxpool)
+    64 * (conv 17/2 + bn + relu + maxpool)
+    128 * (conv 15/2 + bn + relu + maxpool)
+    256 * (conv 13/2 + bn + relu + maxpool)
+    512 * (conv 11/2 + bn + relu + maxpool)
+    flatten
+    dropout 0.5
+    dense 256 relu
+    dropout 0.5
+    dense 256 relu
+    dense 12 softmax

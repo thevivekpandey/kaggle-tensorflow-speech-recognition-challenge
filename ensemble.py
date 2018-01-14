@@ -126,9 +126,13 @@ def predict_4(scores):
     return FINAL_I2L[max_label]
     
 def predict_5(scores):
+    p1 = 1.0
+    p2 = 0.2
     arr = []
     for i in range(12):
-        arr.append((scores[1][i])**2.0 + scores[2][i]**2.0 + scores[3][i]**2.0)
+        arr.append(scores[1][i]**p1 + 
+                   scores[2][i]**p1 + 
+                   scores[3][i]**p1)
 
     max_label = -1
     max_prob = 0
@@ -148,7 +152,7 @@ def predict_5(scores):
         part1 = scores[1][i] / (1 - scores[1][11])
         part2 = scores[2][i] / (1 - scores[2][11])
         part3 = scores[3][i] / (1 - scores[3][11])
-        arr.append(part0**0.1 + part1**0.1 + part2**0.1 + part3**0.1)
+        arr.append(part0**p2 + part1**p2 + part2**p2 + part3**p2)
 
     max_label = -1
     max_prob = 0
@@ -158,9 +162,62 @@ def predict_5(scores):
             max_prob = arr[i]
     return FINAL_I2L[max_label]
     
+def predict_6(scores):
+    p1 = 1.0
+    p2 = 0.2
+    p3 = 0.5
+    arr = []
+    for i in range(12):
+        arr.append(scores[1][i]**p1 + 
+                   scores[2][i]**p1 + 
+                   scores[3][i]**p1)
 
+    max_label = -1
+    max_prob = 0
+    for i in range(12):
+        if arr[i] > max_prob:
+            max_label = i
+            max_prob = arr[i]
+    #If first 3 guys rule silence, silence it is
+    if max_label == 11:
+        return FINAL_I2L[max_label]
+    
+    #If first 3 guys rule something other than silence, we vote again
+    arr = []
+    for i in range(11):
+        part0 = scores[0][i] * 0.99
+        part1 = scores[1][i] / (1 - scores[1][11])
+        part2 = scores[2][i] / (1 - scores[2][11])
+        part3 = scores[3][i] / (1 - scores[3][11])
+        arr.append(part0**p2 + part1**p2 + part2**p2 + part3**p2)
 
+    max_label = -1
+    max_prob = 0
+    for i in range(11):
+        if arr[i] > max_prob:
+            max_label = i
+            max_prob = arr[i]
+    #If they say unknown, it is unknown
+    if max_label == 10:
+        return FINAL_I2L[max_label]
 
+    #Else a third round of voting takes place
+    arr = []
+    for i in range(11):
+        part0 = scores[0][i] * 0.99
+        part1 = scores[1][i] / (1 - scores[1][11])
+        part2 = scores[2][i] / (1 - scores[2][11])
+        part3 = scores[3][i] / (1 - scores[3][11])
+        arr.append(part0**p3 + part1**p3 + part2**p3 + part3**p3)
+
+    max_label = -1
+    max_prob = 0
+    for i in range(11):
+        if arr[i] > max_prob:
+            max_label = i
+            max_prob = arr[i]
+    return FINAL_I2L[max_label]
+    
 def load_scores_from_file(fname):
     my_dict = {}
     f = open(fname)

@@ -28,5 +28,4 @@ class PredictionEngine:
             labels.append(np.argmax(p))
             probs.append(np.amax(p))
             arrs.append(np.array(arr))
-            print filename, np.argmax(p), np.amax(p)
         return labels, probs, arrs

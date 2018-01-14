@@ -147,8 +147,10 @@ class DataGenerator(object):
                     x = acoustics.generator.noise(16000, color=noise_color) / 10
         else:
             cat_size = self.data[label].shape[0]
-            f = 0.90 #What fraction of all data is for training
-            if t == 'train':
+            # First 0.1 is for test, last 0.9 for training: by pseudo labelling, data
+            # is appended at the end
+            f = 0.10 
+            if t == 'test':
                 frac = one_float * f
             else:
                 frac = f + one_float * (1 - f)

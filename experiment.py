@@ -203,8 +203,8 @@ def run_keras(model, model_number, n_mfcc, n_mels, silence_vs_non_silence, silen
     checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=0, save_best_only=False, mode='max')
     reduce_lr = ReduceLROnPlateau(verbose=1, min_lr = 1e-8, patience=5, factor=0.3)
     prediction_engine = PredictionEngine(n_mfcc, n_mels)
-    log_callback = MyCallback(generator, prediction_engine, model_number)
-    callbacks = [checkpoint, reduce_lr, log_callback]
+    #log_callback = MyCallback(generator, prediction_engine, model_number)
+    callbacks = [checkpoint, reduce_lr]
 
     model.fit_generator(generator=training_generator, validation_data=test_generator, 
                         steps_per_epoch=200, validation_steps=20,

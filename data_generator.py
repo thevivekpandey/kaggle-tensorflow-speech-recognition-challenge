@@ -6,6 +6,7 @@ import librosa
 import datetime
 import acoustics
 from wrong_label_checker import WrongLabelChecker
+import random
 
 CATEGORY_2_LABEL = {
 'one': 10,  'up': 0,     'bed': 10, 'two': 10, 'eight': 10, 'seven': 10, 'five': 10, 'nine': 10,
@@ -206,6 +207,8 @@ class DataGenerator(object):
                 continue
             label = CATEGORY_2_LABEL[category]
             ws = os.listdir(BASE_PATH + category + '/')
+            random.shuffle(ws)
+            
             for w in ws:
                 if wlc.is_labelled_wrongly(category + '/' + w):
                     continue
@@ -230,6 +233,7 @@ class DataGenerator(object):
     def get_silence_file(self):
         #Make one big silence file
         ws = os.listdir(BASE_PATH + '_background_noise_/')
+        random.shuffle(ws)
         total_arr, b = librosa.load(BASE_PATH + '_background_noise_/running_tap.wav', sr=16000)
         for w in ws:
             # colored noises are generated at runtime
